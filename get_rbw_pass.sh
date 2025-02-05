@@ -12,7 +12,7 @@ else
     # Error getting password (multiple choices): parse error and select entry with dmenu
     [[ "$PASS" =~ multiple\ entries\ found:\ (.*) ]] 
     ENTRIES="${BASH_REMATCH[1]}" # "name1@google.com, name2@google.com, name3@google.com"
-    SELECTED_ENTRY=$(echo "$ENTRIES" | tr ',' '\n' | dmenu -i)
+    SELECTED_ENTRY=$(echo "$ENTRIES" | tr ',' '\n' | bemenu -i)
     [[ "$SELECTED_ENTRY" =~ (.*)@[^@]* ]]  
     SELECTED_ENTRY=$(echo "${BASH_REMATCH[1]}" | xargs) # "name1" in " name1@google.com
 
