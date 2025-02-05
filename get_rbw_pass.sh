@@ -1,4 +1,4 @@
-#!/bin/sh
+#!/bin/bash
 
 [[ "$QUTE_URL" =~ https?:\/\/([^/]*?\.)?([^/.]+)\.[^/.]+ ]] 
 BASE_URL="${BASH_REMATCH[2]}" # "google" from "https://accounts.google.com/help"
@@ -6,18 +6,18 @@ BASE_URL="${BASH_REMATCH[2]}" # "google" from "https://accounts.google.com/help"
 if PASS=$(rbw get "$BASE_URL" 2>&1 );
 then
     # No error getting password: copy password to clipboard and then get TOTP (or clear)
-    TOTP=$(rbw code "$BASE_URL" 2>/dev/null) 
+    TOTP=""
     USER="$(rbw get --full "$BASE_URL" | sed -n '2 p' | awk  '{print $2}')"
 else
     # Error getting password (multiple choices): parse error and select entry with dmenu
     [[ "$PASS" =~ multiple\ entries\ found:\ (.*) ]] 
     ENTRIES="${BASH_REMATCH[1]}" # "name1@google.com, name2@google.com, name3@google.com"
-    SELECTED_ENTRY=$(echo "$ENTRIES" | tr ',' '\n' | bemenu -i)
+    SELECTED_ENTRY=$(echo "$ENTRIES" | tr ',' '\n' | bemenu -i -cl10 --fn "Monospace 16" --fixed-height -W0.5 -B 5 -R 30  --bdr "#5e5e5e" --nb "#1e1e1e" --nf "#c0f440" --sf "#1e1e1e" --sb "#f4800d" --tb "#d7dd90" --tf "#111206" --hb "#49088c" --hf "#c2fbd3" )
     [[ "$SELECTED_ENTRY" =~ (.*)@[^@]* ]]  
     SELECTED_ENTRY=$(echo "${BASH_REMATCH[1]}" | xargs) # "name1" in " name1@google.com
 
     PASS=$(rbw get "$BASE_URL" "$SELECTED_ENTRY");
-    TOTP=$(rbw code "$BASE_URL" "$SELECTED_ENTRY" 2>/dev/null) 
+    TOTP=""
     USER="$(rbw get --full "$BASE_URL" "$SELECTED_ENTRY" | sed -n '2 p' | awk  '{print $2}')"
 fi
 
@@ -80,6 +80,5 @@ printjs() {
     js | sed 's,//.*$,,' | tr '\n' ' '
 }
 echo "jseval -q $(printjs)" >> "$QUTE_FIFO"
-echo "$PASS" | xclip -selection clipboard 
-((sleep 4; echo "$TOTP" |  xclip -selection clipboard) &) 
+echo "$PASS" | /usr/bin/wl-copy
 
